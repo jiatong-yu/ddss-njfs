@@ -93,9 +93,10 @@ def pull_person_bbox(frames):
   """
   (for centroid method) pull bounding box regions for each person 
   in each frame. 
+  TODO: need better output representation to build gallery
 
   Args:
-    frames: np array, all frames need to contain at least one person TODO can relax 
+    frames: np array
   
   Returns:
     gallary: masked np array, same size as input. 
@@ -118,4 +119,7 @@ def pull_person_bbox(frames):
     idxs = np.where(categories==0)
     for idx in idxs:
       box = boxes[idx]
-      mask = cv2.rectangle()
+      mask = cv2.rectangle(parent_mask,pt1=(int(box[0]),int(box[1])),pt2=(int(box[2]),int(box[3])),
+      color=(255,255,255),thickness=-1)
+      gallery.append(cv2.bitwise_and(frame,mask))
+  return gallery
