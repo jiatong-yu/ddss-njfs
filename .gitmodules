@@ -1,0 +1,6 @@
+[submodule "centroids-reid"]
+	path = centroids-reid
+	url = https://github.com/mikwieczorek/centroids-reid
+[submodule "centroid"]
+	path = centroid
+	url = https://github.com/mikwieczorek/centroids-reid

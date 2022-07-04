@@ -8,8 +8,8 @@ import cv2
 from tqdm import tqdm
 
 from utils.constant import HOMEPATH, DP_JUMP, TASK_BLACK_FRAME, TASK_NO_PERSON
-from data.visualize import visualize_one_frame
 from tools.detection import load_yolo5_model
+from data.visualize import visualize_one_frame
 
 logger = logging.getLogger(__name__)
 LOG_TEMPLATE = "\n"+"-"*10+" %s "+"-"*10
@@ -99,16 +99,16 @@ def pull_person_bbox(frames):
     frames: np array
   
   Returns:
-    gallary: masked np array, same size as input. 
+    gallary: masked np array, one for each person in each frame 
 
   """
 
   logger.warning(LOG_TEMPLATE,"pulling gallery bbox.")
   model = load_yolo5_model()
   gallery = []
-  parent_mask = np.zeros(frames[0].shape,dtype=np.uint8)
 
   for frame in tqdm(frames):
+    mask = np.zeros(frame.shape, dtype=np.uint8)
     pred = model(frame).pred[0]
     boxes = pred[:, :4] # x1, y1, x2, y2
     categories = pred[:, 5]
@@ -116,10 +116,11 @@ def pull_person_bbox(frames):
         logger.warning(LOG_TEMPLATE,"WARNING: contains empty frame.")
         continue 
     
-    idxs = np.where(categories==0)
+    idxs = np.where(categories==0)[0]
     for idx in idxs:
       box = boxes[idx]
-      mask = cv2.rectangle(parent_mask,pt1=(int(box[0]),int(box[1])),pt2=(int(box[2]),int(box[3])),
+      mask = cv2.rectangle(mask,pt1=(int(box[0]),int(box[1])),pt2=(int(box[2]),int(box[3])),
       color=(255,255,255),thickness=-1)
+      temp_frame = cv2.bitwise_and(frame,mask)
       gallery.append(cv2.bitwise_and(frame,mask))
   return gallery
