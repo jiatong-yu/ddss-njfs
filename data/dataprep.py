@@ -1,5 +1,8 @@
-import logging 
+import logging
+from multiprocessing.sharedctypes import Value 
 import os
+import sys
+import pickle 
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -7,12 +10,13 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 
+sys.path.append("/Users/jiatongyu/Desktop/njfs/")
 from utils.constant import HOMEPATH, DP_JUMP, TASK_BLACK_FRAME, TASK_NO_PERSON
 from tools.detection import load_yolo5_model
 from data.visualize import visualize_one_frame
 
 logger = logging.getLogger(__name__)
-LOG_TEMPLATE = "\n"+"-"*10+" %s "+"-"*10
+LOG_TEMPLATE = "\n"+"-"*10+" %s"
 
 def load_frames_from_path(
   video_path:str, # full path to video to load 
@@ -82,14 +86,14 @@ def load_frames_from_path(
   if save_to_folder:
     if not os.path.exists(folder_path):
       raise FileNotFoundError(f"{folder_path} does not exist.")
-    logger.warning(LOG_TEMPLATE,f"Saving frames to {folder_path}.")
+    logger.warning(f"Saving frames to {folder_path}.")
     raise NotImplementedError()
 
   return frames
 
 
 
-def pull_person_bbox(frames):
+def pull_person_bbox(frames, save_to_folder = False, folder_path = None):
   """
   (for centroid method) pull bounding box regions for each person 
   in each frame. 
@@ -123,4 +127,11 @@ def pull_person_bbox(frames):
       color=(255,255,255),thickness=-1)
       temp_frame = cv2.bitwise_and(frame,mask)
       gallery.append(cv2.bitwise_and(frame,mask))
+
+  if save_to_folder:
+    if folder_path is None or (not os.path.exists(folder_path)):
+      raise ValueError("Folder path to save gallery doesn't exist.")
+    logger.warning(f"Saving gallery to {folder_path}.")
+    pickle.dump(gallery, open(folder_path,"wb"))
+  
   return gallery

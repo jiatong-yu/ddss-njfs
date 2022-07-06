@@ -4,3 +4,6 @@ torch
 yolov5
 tqdm 
 ipykernel
+pytorch_lightning
+einops
+yacs
